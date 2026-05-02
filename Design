@@ -1,0 +1,64 @@
+`timescale 1ns / 1ps
+
+module vending_machine(
+    input clk,
+    input rst,
+    input coin_1, // 5 cents
+    input coin_2, // 10 cents
+    output reg product,
+    output reg return_change
+);
+
+    reg [1:0] current_state, next_state;
+    
+    parameter s1 = 2'b00; // 0 cents
+    parameter s2 = 2'b01; // 5 cents
+    parameter s3 = 2'b10; // 10 cents
+    parameter s4 = 2'b11; // 15 cents
+
+    always @(posedge clk or posedge rst) begin
+        if(rst)
+            current_state <= s1;
+        else
+            current_state <= next_state;
+    end
+
+    always @(*) begin
+        next_state = current_state;
+        product = 0;
+        return_change = 0;
+
+        case(current_state)
+            s1: begin
+                if(coin_1) next_state = s2;
+                else if (coin_2) next_state = s3;
+            end
+            
+            s2: begin
+                if(coin_1) next_state = s3;
+                else if (coin_2) next_state = s4;
+            end
+            
+            s3: begin
+                if(coin_1) begin
+                    next_state = s4;
+                end
+                else if (coin_2) begin
+                    // Logic: 10c + 10c = 20c. Price is 15c.
+                    product = 1;
+                    return_change = 1; // Return 5c
+                    next_state = s1;
+                end
+            end
+            
+            s4: begin
+                // Logic: 15c reached exactly
+                product = 1;
+                return_change = 0;
+                next_state = s1;
+            end
+            
+            default: next_state = s1;
+        endcase
+    end
+endmodule
