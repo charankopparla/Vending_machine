@@ -1,0 +1,45 @@
+`timescale 1ns / 1ps
+
+module vending_machine_tb();
+    reg clk;
+    reg rst;
+    reg coin_1;
+    reg coin_2;
+    wire product;
+    wire return_change;
+
+    vending_machine dut (
+        .clk(clk),
+        .rst(rst),
+        .coin_1(coin_1),
+        .coin_2(coin_2),
+        .product(product),
+        .return_change(return_change)
+    );
+
+    always #5 clk = ~clk;
+
+    initial begin
+        clk = 0;
+        rst = 1;
+        coin_1 = 0;
+        coin_2 = 0;
+        #20 rst = 0;
+        
+      
+        @(posedge clk); #1;
+        coin_2 = 1;         
+        @(posedge clk); #1;
+        coin_2 = 0;
+        
+        #20;                
+        
+        @(posedge clk); #1;
+        coin_2 = 1;         
+        @(posedge clk); #1;
+        coin_2 = 0;
+        
+        #100;
+        $finish();
+    end
+endmodule
